@@ -14,7 +14,11 @@ import com.tomtom.online.sdk.location.FusedLocationSource
 import timber.log.Timber
 import android.R.attr.radius
 import android.content.ServiceConnection
+import android.widget.Toast
 import com.tomtom.online.sdk.common.location.LatLng
+import com.tomtom.online.sdk.map.RouteBuilder
+import com.tomtom.online.sdk.routing.OnlineRoutingApi
+import com.tomtom.online.sdk.routing.RoutingApi
 import com.tomtom.online.sdk.routing.data.*
 import com.tomtom.online.sdk.search.data.SearchQuery
 import io.reactivex.internal.disposables.DisposableHelper.isDisposed
@@ -25,29 +29,31 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import com.tomtom.online.sdk.search.extensions.SearchServiceManager
-
-
-
-
+import io.reactivex.disposables.CompositeDisposable
+import java.util.concurrent.Executors
 
 
 class MainActivity : AppCompatActivity(), LocationListener, SearchServiceConnectionCallback {
-    private lateinit var searchService: SearchService
+    lateinit var searchService: SearchService
+    lateinit var routePlannerAPI: RoutingApi
+    val networkScheduler = Schedulers.from(Executors.newFixedThreadPool(4))
 
+    private val compositeDisposable = CompositeDisposable()
     override fun onBindSearchService(searchService: SearchService) {
         this.searchService = searchService
     }
-
+    var found = false;
     override fun onLocationChanged(location: Location?) {
         location?.let {
             Timber.d("accuracy " +  it.accuracy)
-            if (it.accuracy <= 10.0){
-                Timber.i("lat %d, lng %d", it.latitude, it.longitude);
-                performSearch(it, createQueryWithPosition(LatLng(it.latitude, it.longitude)));
+            if (it.accuracy <= 10.0f && !found){
+                Timber.i("lat "+ it.latitude +" lng "+ it.longitude);
+                performSearch(LatLng(it.latitude, it.longitude), createQueryWithPosition(LatLng(it.latitude, it.longitude)));
             }
         }
 
     }
+
 
     private lateinit var searchServiceConnection: ServiceConnection
 
@@ -71,16 +77,40 @@ class MainActivity : AppCompatActivity(), LocationListener, SearchServiceConnect
                 .subscribe(object : Consumer<SearchResponse> {
                     override fun accept(r: SearchResponse) {
                         Timber.i("Result " + r.searchResults[0])
+                        val result = r.searchResults[0]
                         val location = r.searchResults[0].location
                         Timber.i("location result " + location)
-
-                        showRoute(getRouteQuery(TravelMode.PEDESTRIAN));
+                        found= true
+                        Toast.makeText(this@MainActivity, result.name + " \n " + result.addressLine1, Toast.LENGTH_SHORT).show()
+                        showRoute(getRouteQuery(mYPos, r.searchResults[0].location));
 
                     }
                 })
     }
 
-     fun getRouteQuery(orgin: LatLng, dest: LatLng) : RouteQuery {
+    private fun showRoute(routeQuery: RouteQuery) {
+        val subscribe = routePlannerAPI.planRoute(routeQuery).subscribeOn(networkScheduler)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(Consumer<RouteResult> { routeResult -> displayRoutes(routeResult) }, Consumer<Throwable> { proceedWithError(it.message!!) })
+        compositeDisposable.add(subscribe)
+    }
+
+    private fun proceedWithError(text: String) {
+        Toast.makeText(this, "Error " + text, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun displayRoutes(routeResult: RouteResult) {
+        val route = routeResult.routes[0]
+        val routeBuilder = RouteBuilder(route.getCoordinates())
+                .isActive(true)
+        mapFragment.applyToMap {
+            addRoute(routeBuilder)
+            displayRoutesOverview()
+        }
+
+    }
+
+    fun getRouteQuery(orgin: LatLng, dest: LatLng) : RouteQuery {
 
        val queryBuilder = RouteQueryBuilder(orgin, dest)
                 .withMaxAlternatives(0)
@@ -88,7 +118,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SearchServiceConnect
                 .withInstructionsType(InstructionsType.TEXT)
                 .withTravelMode(TravelMode.PEDESTRIAN);
 
-        return queryBuilder.;
+        return queryBuilder;
     }
 
     val STANDARD_RADIUS = 10 * 1000 //10 km
@@ -117,12 +147,15 @@ class MainActivity : AppCompatActivity(), LocationListener, SearchServiceConnect
 
     override fun onResume() {
         super.onResume()
+        startAndBindToSearchService()
+        routePlannerAPI = OnlineRoutingApi.create(this)
         locationSource = getLocationSource(this)
         locationSource.activate()
     }
 
     override fun onPause() {
         super.onPause()
+        compositeDisposable.clear()
         locationSource.deactivate()
     }
 
