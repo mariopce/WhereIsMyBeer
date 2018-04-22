@@ -13,8 +13,10 @@ import com.tomtom.online.sdk.location.LocationRequestsFactory
 import com.tomtom.online.sdk.routing.OnlineRoutingApi
 import com.tomtom.online.sdk.routing.RoutingApi
 import com.tomtom.online.sdk.routing.data.*
-import com.tomtom.online.sdk.search.data.SearchQuery
-import com.tomtom.online.sdk.search.data.SearchResponse
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQuery
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchQueryBuilder
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResponse
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult
 import com.tomtom.online.sdk.search.extensions.SearchService
 import com.tomtom.online.sdk.search.extensions.SearchServiceConnectionCallback
 import com.tomtom.online.sdk.search.extensions.SearchServiceManager
@@ -25,13 +27,13 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import java.util.concurrent.Executors
 
-class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServiceConnectionCallback, LocationListener {
+class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServiceConnectionCallback
+{
 
 
     private var lastLocation : Location? = null
     lateinit var searchService: SearchService
     lateinit var routePlannerAPI: RoutingApi
-    lateinit var locationSource: FusedLocationSource
     val networkScheduler = Schedulers.from(Executors.newFixedThreadPool(4))
 
     private val compositeDisposable = CompositeDisposable()
@@ -39,13 +41,6 @@ class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServic
     override fun setupServices(context: Context) {
         startAndBindToSearchService(context)
         routePlannerAPI = OnlineRoutingApi.create(context)
-        locationSource = getLocationSource(context)
-        locationSource.activate()
-    }
-
-    @NonNull
-    fun getLocationSource(context: Context): FusedLocationSource {
-        return FusedLocationSource(context, this, LocationRequestsFactory.create().createSearchLocationRequest())
     }
 
     private lateinit var searchServiceConnection: ServiceConnection
@@ -74,19 +69,14 @@ class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServic
 
     }
 
-    override fun onPause() {
-        locationSource.deactivate()
-    }
     val STANDARD_RADIUS = 10 * 1000 //10 km
-    protected fun createQueryWithPosition(position: LatLng?): SearchQuery {
-        return SearchQuery.builder()
-                .term("Bar")
-                .location(position).radius(STANDARD_RADIUS)
-                .build()
+    protected fun createQueryWithPosition(position: LatLng?): FuzzySearchQuery {
+        return FuzzySearchQueryBuilder("pub").withCategory(true)
+                .withLimit(10).withPosition(position, STANDARD_RADIUS);
 
     }
     @SuppressLint("CheckResult")
-    private fun performSearch(mYPos : LatLng, query: SearchQuery) {
+    private fun performSearch(mYPos : LatLng, query: FuzzySearchQuery) {
         searchService.search(query)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -94,16 +84,17 @@ class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServic
                     override fun accept(t: Throwable) {
                         Timber.e(t)
                     }
-
-
                 })
-                .subscribe(object : Consumer<SearchResponse> {
-                    override fun accept(r: SearchResponse) {
-                        Timber.i("Result " + r.searchResults[0])
-                        val result = r.searchResults[0]
-                        val location = r.searchResults[0].location
-                        Timber.i("location result " + location)
-                        findRoute(getRouteQuery(mYPos, location))
+                .subscribe(object : Consumer<FuzzySearchResponse> {
+                    override fun accept(r: FuzzySearchResponse) {
+                        if (r.results.isNotEmpty()) {
+                            Timber.i("Result " + r.results[0])
+                            val result = r.results[0]
+                            val location = r.results[0].position
+                            view.showResult(mYPos, result);
+                            Timber.i("location result " + location)
+                            findRoute(getRouteQuery(mYPos, location), result);
+                        }
                     }
                 })
     }
@@ -119,11 +110,14 @@ class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServic
         return queryBuilder;
     }
 
-    private fun findRoute(routeQuery: RouteQuery) {
+    private fun findRoute(routeQuery: RouteQuery, result : FuzzySearchResult) {
         val subscribe = routePlannerAPI.planRoute(routeQuery).subscribeOn(networkScheduler)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(Consumer<RouteResult> { routeResult -> view.displayRoutes(routeResult) }, Consumer<Throwable> { view.proceedWithError(it.message!!) })
+                .subscribe(Consumer<RouteResult> { routeResult -> view.displayRoutes(routeResult, result) }, Consumer<Throwable> { view.proceedWithError(it.message!!) })
         compositeDisposable.add(subscribe)
+    }
+    override fun onPause() {
+        compositeDisposable.clear()
     }
 
 }

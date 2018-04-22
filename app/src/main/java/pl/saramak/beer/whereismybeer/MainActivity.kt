@@ -1,52 +1,18 @@
 package pl.saramak.beer.whereismybeer
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import com.tomtom.online.sdk.map.MapFragment
-import com.tomtom.online.sdk.map.TomtomMap
-import com.tomtom.online.sdk.location.FusedLocationSource
+import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import com.tomtom.online.sdk.common.location.LatLng
-import com.tomtom.online.sdk.map.Icon
-import com.tomtom.online.sdk.map.RouteBuilder
-import com.tomtom.online.sdk.routing.data.*
-import com.tomtom.online.sdk.search.data.SearchResponse
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
-import io.reactivex.schedulers.Schedulers
-import io.reactivex.disposables.CompositeDisposable
-import java.util.concurrent.Executors
+import com.tomtom.online.sdk.map.*
+import com.tomtom.online.sdk.routing.data.RouteResult
+import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult
 
 
 class MainActivity : AppCompatActivity(), BearInfoView {
 
-
-
-
-
-    override fun proceedWithError(text: String) {
-        Toast.makeText(this, "Error " + text, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun displayRoutes(routeResult: RouteResult) {
-        val route = routeResult.routes[0]
-        val routeBuilder = RouteBuilder(route.getCoordinates())
-                .startIcon(Icon.Factory.fromResources(this, R.drawable.ic_map_route_departure))
-                .endIcon(Icon.Factory.fromResources(this, R.drawable.beerglassicon))
-                .isActive(true)
-        mapFragment.applyToMap {
-            addRoute(routeBuilder)
-            displayRoutesOverview()
-        }
-
-    }
-
-
-
-
-
     lateinit var mapFragment: MapFragment
-    lateinit var beerPresenter : BeerPresenter
+    lateinit var beerPresenter: BeerPresenter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -55,31 +21,75 @@ class MainActivity : AppCompatActivity(), BearInfoView {
         mapFragment.applyToMap({
             //Set current location enabled
             isMyLocationEnabled = true
+
         })
 
     }
 
-
+    val mapMargin = 100.0
     /**
      * Resume location source and setups services
      */
     override fun onResume() {
         super.onResume()
         beerPresenter.setupServices(this);
-
+        mapFragment.applyToMap({
+            //Set current location enabled
+            isMyLocationEnabled = true
+            setPadding(mapMargin, mapMargin, mapMargin, mapMargin);
+            locationSource.addLocationUpdateListener(beerPresenter)
+        })
     }
 
     /**
      * Deactivate location source, because battery consumption and unregister listeners.
      */
     override fun onPause() {
-        super.onPause()
+        super.onPause();
+        mapFragment.applyToMap({
+            locationSource.removeAllLocationUpdateListeners()
+        })
         beerPresenter.onPause();
 
     }
-    override fun showResult(myPosition: LatLng,r : SearchResponse) {
-        val result = r.searchResults[0]
-        Toast.makeText(this@MainActivity, result.name + " \n " + result.addressLine1, Toast.LENGTH_SHORT).show()
+
+
+    override fun proceedWithError(text: String) {
+        Toast.makeText(this, "Error " + text, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun displayRoutes(routeResult: RouteResult, result: FuzzySearchResult) {
+        val route = routeResult.routes[0]
+        val routeBuilder = RouteBuilder(route.getCoordinates())
+                .startIcon(Icon.Factory.fromResources(this, R.drawable.ic_map_route_departure))
+                .isActive(true)
+        mapFragment.applyToMap {
+            clear()
+            addRoute(routeBuilder)
+            val marker = addMarker(MarkerBuilder(result.position)
+                    .icon(Icon.Factory.fromResources(this@MainActivity, R.drawable.beerglassiconsmall))
+                    .markerBalloon(SimpleMarkerBalloon(result.poi.name +
+                            "\n" + formatAddress(result) + "\n "
+                            + route.summary.lengthInMeters + "m.")))
+            marker.select()
+            displayRoutesOverview()
+            zoomOut()
+        }
+
+    }
+
+    private fun formatAddress(result: FuzzySearchResult) : String {
+        val address = result.address.freeformAddress;
+        if (address.contains(",")){
+            val splitedAddress = address.split(",");
+            return splitedAddress[0] + "\n" + splitedAddress[1];
+        }else{
+            return address;
+        }
+    }
+
+    override fun showResult(myPosition: LatLng, result: FuzzySearchResult) {
+        Toast.makeText(this@MainActivity, result.poi.name + " \n " + result.address.freeformAddress, Toast.LENGTH_SHORT).show()
     }
 
     /**
