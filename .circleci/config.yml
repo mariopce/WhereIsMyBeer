@@ -143,7 +143,7 @@ jobs:
       - *encrypt_keystore
       - *ruby_dependencies
       - *save_gems_cache
-      - run: 
+      - run:
           name: Deploy beta
           command: bundle exec fastlane android beta
 
@@ -153,7 +153,7 @@ workflows:
   all:
     jobs:
       - build_release
-      - beta:
+      - deploy_beta:
           requires:
             - build_release
             - test_instrumented
