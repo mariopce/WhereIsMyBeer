@@ -107,7 +107,8 @@ jobs:
             destination: apk
         - store_test_results:
             path: app/build/test-results
-  test_unit:
+
+  test_instrumented:
       <<: *android_config
       steps:
         - checkout
@@ -133,5 +134,6 @@ workflows:
   workflow:
     jobs:
       - build_release
-      - test_unit
-
+      - test_instrumented:
+          requires:
+            - build_release
