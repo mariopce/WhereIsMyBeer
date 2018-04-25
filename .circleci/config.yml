@@ -13,6 +13,25 @@ references:
         paths:
           - ~/.gradle
           - ~/.m2
+
+  restore_gems_cache: &restore_gems_cache
+    restore_cache:
+      key: *gems_key
+
+  gems_key: &gems_key
+    gems-{{ checksum "Gemfile.lock" }}
+
+  save_gems_cache: &save_gems_cache
+    save_cache:
+      key: *gems_key
+      paths:
+        - vendor/bundle
+
+  ruby_dependencies: &ruby_dependencies
+    run:
+      name: Download Ruby Dependencies
+      command: bundle check || bundle install --path vendor/bundle
+
   workspace: &workspace
     ~/workspace
   attach_debug_workspace: &attach_debug_workspace
@@ -88,11 +107,31 @@ jobs:
             destination: apk
         - store_test_results:
             path: app/build/test-results
-
+  test_unit:
+      <<: *android_config
+      steps:
+        - checkout
+        - *restore_gems_cache
+        - *restore_cache
+        - *ruby_dependencies
+        - *swap_tt_key
+        - *encrypt_keystore
+        - *ruby_dependencies
+        - *save_gems_cache
+        - run:
+            name: Run unit tests
+            command: bundle exec fastlane android test
+        - store_artifacts:
+            path: app/build/reports/
+            destination: /reports/
+        - store_test_results:
+            path: app/build/test-results/
+            destination: /test-results/
 
 workflows:
   version: 2
   workflow:
     jobs:
       - build_release
+      - test_unit
 
