@@ -4,9 +4,14 @@ references:
 
   cache_key: &cache_key
     key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+
+  gems_key: &gems_key
+    key: gems-{{ checksum "Gemfile.lock" }}
+
   restore_cache: &restore_cache
       restore_cache:
         <<: *cache_key
+
   save_cache: &save_cache
       save_cache:
         <<: *cache_key
@@ -16,18 +21,16 @@ references:
 
   restore_gems_cache: &restore_gems_cache
     restore_cache:
-      key: *gems_key
-
-  gems_key: &gems_key
-    gems-{{ checksum "Gemfile.lock" }}
+      <<: *gems_key
 
   save_gems_cache: &save_gems_cache
     save_cache:
-      key: *gems_key
+      <<: *gems_key
       paths:
         - vendor/bundle
 
   ruby_dependencies: &ruby_dependencies
+    root: *workspace
     run:
       name: Download Ruby Dependencies
       command: bundle check || bundle install --path vendor/bundle
@@ -61,7 +64,7 @@ references:
       root: *workspace
       paths:
         - firebase
-## Docker image configurations
+  ## Docker image configurations
 
   android_config: &android_config
     working_directory: *workspace
@@ -114,7 +117,6 @@ jobs:
         - checkout
         - *restore_gems_cache
         - *restore_cache
-        - *ruby_dependencies
         - *swap_tt_key
         - *encrypt_keystore
         - *ruby_dependencies
@@ -131,7 +133,7 @@ jobs:
 
 workflows:
   version: 2
-  workflow:
+  all:
     jobs:
       - build_release
       - test_instrumented:
