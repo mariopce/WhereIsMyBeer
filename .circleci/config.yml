@@ -59,6 +59,7 @@ references:
       root: *workspace
       paths:
         - firebase
+
 ## Docker image configurations
 
   android_config: &android_config
