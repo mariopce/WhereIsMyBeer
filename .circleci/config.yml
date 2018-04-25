@@ -13,7 +13,7 @@ references:
         paths:
           - ~/.gradle
           - ~/.m2
-workspace: &workspace
+  workspace: &workspace
     ~/workspace
   attach_debug_workspace: &attach_debug_workspace
     attach_workspace:
