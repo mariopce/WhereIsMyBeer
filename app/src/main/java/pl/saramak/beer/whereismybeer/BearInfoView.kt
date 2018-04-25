@@ -9,5 +9,4 @@ interface BearInfoView {
     fun showResult(myPostition:LatLng, result: FuzzySearchResult);
     fun displayRoutes(routeResult: RouteResult, result: FuzzySearchResult)
     fun proceedWithError(message: String)
-
 }
