@@ -12,3 +12,4 @@
 client-secret.json
 saramak.jks
 fastlane/report.xml
+fastlane/play.json

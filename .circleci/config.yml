@@ -74,10 +74,14 @@ references:
     run:
       name: Swap TomTom Key
       command: sed -i "s/TTKEY/$SECRET/g" app/src/main/AndroidManifest.xml
-  encrypt_keystore: &encrypt_keystore
+  decrypt_keystore: &encrypt_keystore
       run:
-        name: Encrypt keystore
+        name: Decrypt keystore
         command: openssl aes-256-cbc -d -in saramak.jks.enc -out saramak.jks -k $SECRET -md md5
+  decrypt_play: &decrypt_play
+        run:
+          name: decrypt play
+          command: openssl aes-256-cbc -d -in fastlane/play.json.enc -out fastlane/play.json -k $SECRET -md md5
 
   ruby_dependencies: &ruby_dependencies
       run:
@@ -94,7 +98,7 @@ jobs:
         - checkout
         - *restore_cache
         - *swap_tt_key
-        - *encrypt_keystore
+        - *decrypt_keystore
         - run:
             name: Download dependencies
             command: ./gradlew androidDependencies
@@ -121,7 +125,7 @@ jobs:
         - *restore_cache
         - *attach_debug_workspace
         - *swap_tt_key
-        - *encrypt_keystore
+        - *decrypt_keystore
         - *ruby_dependencies
         - *save_gems_cache
         - run:
@@ -142,6 +146,9 @@ jobs:
         - store_test_results:
             path: app/build/test-results/
             destination: /test-results/
+        - store_artifacts:
+            path: firebase/
+            destination: /firebase/
 
   deploy_beta:
       <<: *android_config
@@ -150,9 +157,10 @@ jobs:
       - *restore_gems_cache
       - *restore_cache
       - *swap_tt_key
-      - *encrypt_keystore
+      - *decrypt_keystore
       - *ruby_dependencies
       - *save_gems_cache
+      - *decrypt_play
       - run:
           name: Deploy beta
           command: bundle exec fastlane android beta
