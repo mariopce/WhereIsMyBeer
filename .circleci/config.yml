@@ -101,7 +101,7 @@ jobs:
         - *save_cache
         - run:
             name: Run Tests
-            command: ./gradlew lint build
+            command: ./gradlew lint assembleAndroidTest build
         - *save_cache
         - *persist_debug_workspace
         - store_artifacts:
