@@ -11,7 +11,6 @@ references:
   restore_cache: &restore_cache
       restore_cache:
         <<: *cache_key
-
   save_cache: &save_cache
       save_cache:
         <<: *cache_key
@@ -29,11 +28,7 @@ references:
       paths:
         - vendor/bundle
 
-  ruby_dependencies: &ruby_dependencies
-    root: *workspace
-    run:
-      name: Download Ruby Dependencies
-      command: bundle check || bundle install --path vendor/bundle
+
 
   workspace: &workspace
     ~/workspace
@@ -64,7 +59,7 @@ references:
       root: *workspace
       paths:
         - firebase
-  ## Docker image configurations
+## Docker image configurations
 
   android_config: &android_config
     working_directory: *workspace
@@ -82,6 +77,11 @@ references:
       run:
         name: Encrypt keystore
         command: openssl aes-256-cbc -d -in saramak.jks.enc -out saramak.jks -k $SECRET -md md5
+
+  ruby_dependencies: &ruby_dependencies
+      run:
+        name: Download Ruby Dependencies
+        command: bundle check || bundle install --path vendor/bundle
 
 jobs:
 
@@ -138,4 +138,5 @@ workflows:
       - build_release
       - test_instrumented:
           requires:
-            - build_release
+          - build_release
+
