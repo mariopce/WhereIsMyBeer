@@ -15,7 +15,7 @@ jobs:
           command: sed -i "s/TTKEY/$SECRET/g" app/src/main/AndroidManifest.xml
       - run:
           name: encrypt keystore
-          command: openssl aes-256-cbc -d -in saramak.jks.enc -out saramak.jks -k $SECRET 
+          command: openssl aes-256-cbc -d -in saramak.jks.enc -out saramak.jks -k $SECRET -md md5 
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
