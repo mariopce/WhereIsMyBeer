@@ -12,3 +12,4 @@
 Gemfile
 Gemfile.lock
 client-secret.json
+fastlane/report.xml

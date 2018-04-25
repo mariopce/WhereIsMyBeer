@@ -50,7 +50,7 @@ Assemble Build and Test Application
 ```
 fastlane android beta
 ```
-Submit a new Beta Build to Crashlytics Beta
+
 ### android deploy
 ```
 fastlane android deploy
