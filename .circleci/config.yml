@@ -74,7 +74,7 @@ references:
     run:
       name: Swap TomTom Key
       command: sed -i "s/TTKEY/$SECRET/g" app/src/main/AndroidManifest.xml
-  decrypt_keystore: &encrypt_keystore
+  decrypt_keystore: &decrypt_keystore
       run:
         name: Decrypt keystore
         command: openssl aes-256-cbc -d -in saramak.jks.enc -out saramak.jks -k $SECRET -md md5
