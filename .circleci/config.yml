@@ -12,7 +12,10 @@ jobs:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
           name: Swap key 
-          command: sed -i "s/TTKEY/$SECRET/g" app/src/main/AndroidManifest.xml 
+          command: sed -i "s/TTKEY/$SECRET/g" app/src/main/AndroidManifest.xml
+      - run:
+          name: encrypt keystore
+          command: openssl aes-256-cbc -d -in saramak.jks.enc -out saramak.jks -k $SECRET 
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies

@@ -16,10 +16,10 @@ android {
     }
     signingConfigs {
         release {
-            keyAlias SARAMAK_KEY_ALIAS
-            keyPassword SARAMAK_KEY_PASSWORD
+            keyAlias System.getenv("SARAMAK_KEY_ALIAS")
+            keyPassword System.getenv("SARAMAK_KEY_PASSWORD")
             storeFile file("../saramak.jks")
-            storePassword SARAMAK_STORE_PASSWORD
+            storePassword System.getenv("SARAMAK_STORE_PASSWORD")
         }
     }
     buildTypes {

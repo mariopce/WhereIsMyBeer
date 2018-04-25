@@ -12,4 +12,5 @@
 Gemfile
 Gemfile.lock
 client-secret.json
+saramak.jks
 fastlane/report.xml
