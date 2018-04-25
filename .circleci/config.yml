@@ -153,6 +153,9 @@ workflows:
   all:
     jobs:
       - build_release
+      - test_instrumented:
+          requires:
+            - build_release
       - deploy_beta:
           requires:
             - build_release
