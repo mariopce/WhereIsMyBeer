@@ -9,7 +9,6 @@
 /build
 /captures
 .externalNativeBuild
-Gemfile.lock
 client-secret.json
 saramak.jks
 fastlane/report.xml
