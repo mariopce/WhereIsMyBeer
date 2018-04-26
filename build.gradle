@@ -28,3 +28,13 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+ext {
+    codeVersion = getGITVersionNumber()
+}
+
+def getGITVersionNumber() {
+    def cmd = 'git rev-list --all --count'
+    def gitVersion = cmd.execute().text.trim().toInteger()
+    println "=== Building version " + gitVersion.toString()
+    return gitVersion
+}

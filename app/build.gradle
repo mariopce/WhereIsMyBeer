@@ -10,8 +10,8 @@ android {
         applicationId "pl.saramak.beer.whereismybeer"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 3
-        versionName "1.0.3"
+        versionCode rootProject.codeVersion
+        versionName "1.0." + rootProject.codeVersion
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
