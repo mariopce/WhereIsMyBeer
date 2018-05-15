@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 'android-P'
     defaultConfig {
         applicationId "pl.saramak.beer.whereismybeer"
         minSdkVersion 21
@@ -38,22 +38,21 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
     configurations.all {
-        resolutionStrategy.force "com.google.android.gms:play-services-location:12.0.1"
+
     }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'com.android.support:appcompat-v7:27.+'
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation('com.tomtom.online:sdk-maps:2.056@aar') {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
+    implementation('com.tomtom.online:sdk-maps:2.097@aar') {
         transitive = true;
     }
-    implementation('com.tomtom.online:sdk-search:2.056@aar') {
+    implementation('com.tomtom.online:sdk-search:2.097@aar') {
         transitive = true;
     }
-    implementation('com.tomtom.online:sdk-routing:2.056@aar') {
+    implementation('com.tomtom.online:sdk-routing:2.097@aar') {
         transitive = true;
     }
     testImplementation 'junit:junit:4.12'
