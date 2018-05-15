@@ -1,8 +1,11 @@
 = WhereIsMyBeer
+
 WhereIsMyBeer is the app which will find the nearest bar for you and show you the way to it. 
 
 App show example of usage TomTom Android SDK - https://developer.tomtom.com/maps-sdk-android 
 
+image::https://play.google.com/intl/en_us/badges/images/badge_new.png[]
 https://play.google.com/store/apps/details?id=pl.saramak.beer.whereismybeer[Download app from google play]
 
-:imagesdir: fastlane/metadata/android/en-GB/images/phoneScreenshots/device-2018-04-25-181022.png
+image::fastlane/metadata/android/en-GB/images/phoneScreenshots/device-2018-04-25-181022.png[width=300]
+image::fastlane/metadata/android/en-GB/images/phoneScreenshots/device-2018-04-25-181050.png[width=300]
