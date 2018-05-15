@@ -1,6 +1,6 @@
 = WhereIsMyBeer
 
-WhereIsMyBeer is the app which will find the nearest bar for you and show you the way to it. 
+image:https://circleci.com/gh/mariopce/WhereIsMyBeer/tree/master.svg?style=svg["CircleCI", link="https://circleci.com/gh/mariopce/WhereIsMyBeer/tree/master"] WhereIsMyBeer is the app which will find the nearest bar for you and show you the way to it. 
 
 App show example of usage TomTom Android SDK - https://developer.tomtom.com/maps-sdk-android 
 
