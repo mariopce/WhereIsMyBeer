@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity(), BearInfoView {
             isMyLocationEnabled = true
             setPadding(mapMargin, mapMargin, mapMargin, mapMargin);
             locationSource.addLocationUpdateListener(beerPresenter)
-            uiSettings.setMapTilesType(MapTilesType.NONE)
         })
     }
 
