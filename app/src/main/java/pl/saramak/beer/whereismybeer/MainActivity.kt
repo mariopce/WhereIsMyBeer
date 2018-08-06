@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import com.tomtom.online.sdk.common.location.LatLng
 import com.tomtom.online.sdk.map.*
+import com.tomtom.online.sdk.map.model.MapTilesType
 import com.tomtom.online.sdk.routing.data.RouteResult
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult
 
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity(), BearInfoView {
             isMyLocationEnabled = true
             setPadding(mapMargin, mapMargin, mapMargin, mapMargin);
             locationSource.addLocationUpdateListener(beerPresenter)
+            uiSettings.setMapTilesType(MapTilesType.NONE)
         })
     }
 
