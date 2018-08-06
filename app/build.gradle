@@ -46,13 +46,14 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
-    implementation('com.tomtom.online:sdk-maps:2.097@aar') {
+    implementation('com.tomtom.online:sdk-maps:2.228-SNAPSHOT@aar') {
+        transitive = true
+        exclude module: 'sdk-maps-styles-extensions'
+    }
+    implementation('com.tomtom.online:sdk-search:2.228-SNAPSHOT@aar') {
         transitive = true;
     }
-    implementation('com.tomtom.online:sdk-search:2.097@aar') {
-        transitive = true;
-    }
-    implementation('com.tomtom.online:sdk-routing:2.097@aar') {
+    implementation('com.tomtom.online:sdk-routing:2.228-SNAPSHOT@aar') {
         transitive = true;
     }
     testImplementation 'junit:junit:4.12'
