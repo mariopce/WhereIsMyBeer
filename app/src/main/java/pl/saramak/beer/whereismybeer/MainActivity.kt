@@ -1,5 +1,8 @@
 package pl.saramak.beer.whereismybeer
 
+import android.app.PictureInPictureParams
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
@@ -7,6 +10,11 @@ import com.tomtom.online.sdk.common.location.LatLng
 import com.tomtom.online.sdk.map.*
 import com.tomtom.online.sdk.routing.data.RouteResponse
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult
+import android.opengl.ETC1.getHeight
+import android.opengl.ETC1.getWidth
+import android.util.Rational
+
+
 
 
 class MainActivity : AppCompatActivity(), BearInfoView {
@@ -78,12 +86,12 @@ class MainActivity : AppCompatActivity(), BearInfoView {
 
     }
 
-    private fun formatAddress(result: FuzzySearchResult) : String {
+    private fun formatAddress(result: FuzzySearchResult): String {
         val address = result.address.freeformAddress;
-        if (address.contains(",")){
+        if (address.contains(",")) {
             val splitedAddress = address.split(",");
             return splitedAddress[0] + "\n" + splitedAddress[1];
-        }else{
+        } else {
             return address;
         }
     }
@@ -106,5 +114,41 @@ class MainActivity : AppCompatActivity(), BearInfoView {
         }
     }
 
+    override fun onBackPressed() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                && packageManager
+                        .hasSystemFeature(
+                                PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            enterPIPMode()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    private fun enterPIPMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                && packageManager
+                        .hasSystemFeature(
+                                PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            mapFragment.applyToMap {
+                uiSettings.currentLocationView.hide()
+                routeSettings.displayRoutesOverview()
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val params = PictureInPictureParams.Builder()
+
+                val aspectRatio = Rational(mapFragment.view!!.width, mapFragment.view!!.height)
+                params.setAspectRatio(aspectRatio)
+                this.enterPictureInPictureMode(params.build())
+            } else {
+                this.enterPictureInPictureMode()
+            }
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        enterPIPMode()
+    }
 }
 
