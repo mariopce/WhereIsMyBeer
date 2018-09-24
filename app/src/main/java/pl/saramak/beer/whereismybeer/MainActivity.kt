@@ -5,8 +5,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 import com.tomtom.online.sdk.common.location.LatLng
 import com.tomtom.online.sdk.map.*
-import com.tomtom.online.sdk.map.model.MapTilesType
-import com.tomtom.online.sdk.routing.data.RouteResult
+import com.tomtom.online.sdk.routing.data.RouteResponse
 import com.tomtom.online.sdk.search.data.fuzzy.FuzzySearchResult
 
 
@@ -55,12 +54,12 @@ class MainActivity : AppCompatActivity(), BearInfoView {
     }
 
 
-    override fun proceedWithError(text: String) {
-        Toast.makeText(this, "Error " + text, Toast.LENGTH_SHORT).show()
+    override fun proceedWithError(message: String) {
+        Toast.makeText(this, "Error $message", Toast.LENGTH_SHORT).show()
     }
 
-    override fun displayRoutes(routeResult: RouteResult, result: FuzzySearchResult) {
-        val route = routeResult.routes[0]
+    override fun displayRoutes(routeResponse: RouteResponse, result: FuzzySearchResult) {
+        val route = routeResponse.routes[0]
         val routeBuilder = RouteBuilder(route.getCoordinates())
                 .startIcon(Icon.Factory.fromResources(this, R.drawable.ic_map_route_departure))
                 .isActive(true)

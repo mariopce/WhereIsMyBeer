@@ -8,6 +8,7 @@ import android.support.annotation.NonNull
 import android.widget.Toast
 import com.google.android.gms.location.LocationListener
 import com.tomtom.online.sdk.common.location.LatLng
+import com.tomtom.online.sdk.common.location.LatLngAcc
 import com.tomtom.online.sdk.location.FusedLocationSource
 import com.tomtom.online.sdk.location.LocationRequestsFactory
 import com.tomtom.online.sdk.routing.OnlineRoutingApi
@@ -29,8 +30,6 @@ import java.util.concurrent.Executors
 
 class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServiceConnectionCallback
 {
-
-
     private var lastLocation : Location? = null
     lateinit var searchService: SearchService
     lateinit var routePlannerAPI: RoutingApi
@@ -69,10 +68,10 @@ class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServic
 
     }
 
-    val STANDARD_RADIUS = 10 * 1000 //10 km
+    val STANDARD_RADIUS = 10 * 1000f //10 km
     protected fun createQueryWithPosition(position: LatLng?): FuzzySearchQuery {
         return FuzzySearchQueryBuilder("pub").withCategory(true)
-                .withLimit(10).withPosition(position, STANDARD_RADIUS);
+                .withLimit(10).withPreciseness(LatLngAcc(position, STANDARD_RADIUS)).build();
 
     }
     @SuppressLint("CheckResult")
@@ -107,13 +106,13 @@ class NearestBeerPresenter(val view: BearInfoView) : BeerPresenter, SearchServic
                 .withInstructionsType(InstructionsType.TEXT)
                 .withTravelMode(TravelMode.PEDESTRIAN);
 
-        return queryBuilder;
+        return queryBuilder.build();
     }
 
     private fun findRoute(routeQuery: RouteQuery, result : FuzzySearchResult) {
         val subscribe = routePlannerAPI.planRoute(routeQuery).subscribeOn(networkScheduler)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(Consumer<RouteResult> { routeResult -> view.displayRoutes(routeResult, result) }, Consumer<Throwable> { view.proceedWithError(it.message!!) })
+                .subscribe(Consumer<RouteResponse> { routeResult -> view.displayRoutes(routeResult, result) }, Consumer<Throwable> { view.proceedWithError(it.message!!) })
         compositeDisposable.add(subscribe)
     }
     override fun onPause() {
