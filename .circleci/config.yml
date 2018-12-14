@@ -73,7 +73,7 @@ references:
   swap_tt_key: &swap_tt_key
     run:
       name: Swap TomTom Key
-      command: sed -i "s/TTKEY/$SECRET/g" app/src/main/AndroidManifest.xml
+      command: sed -i "s/_______YOUR_KEY_GOES_HERE_______/$SECRET/g" app/src/main/AndroidManifest.xml
   decrypt_keystore: &decrypt_keystore
       run:
         name: Decrypt keystore

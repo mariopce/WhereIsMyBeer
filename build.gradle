@@ -34,7 +34,7 @@ ext {
 
 def getGITVersionNumber() {
     def cmd = 'git rev-list --all --count'
-    def gitVersion = cmd.execute().text.trim().toInteger()
+    def gitVersion = cmd.execute().text.trim().toInteger() + 2
     println "=== Building version " + gitVersion.toString()
     return gitVersion
 }
