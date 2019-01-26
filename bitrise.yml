@@ -4,6 +4,7 @@ project_type: fastlane
 app:
   envs:
   - FASTLANE_XCODE_LIST_TIMEOUT: "120"
+  - FASTLANE_DONT_STORE_PASSWORD: 1
   - FASTLANE_WORK_DIR: .
   - FASTLANE_LANE: android test
 trigger_map:
