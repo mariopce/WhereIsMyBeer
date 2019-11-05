@@ -65,7 +65,7 @@ references:
   android_config: &android_config
     working_directory: *workspace
     docker:
-      - image: circleci/android:api-27-alpha
+      - image: circleci/android:api-28
     environment:
         TERM: dumb
         GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m"'
@@ -99,6 +99,8 @@ jobs:
         - *restore_cache
         - *swap_tt_key
         - *decrypt_keystore
+        - run: yes | sdkmanager --licenses
+        - run: yes | sdkmanager --update || exit 0
         - run:
             name: Download dependencies
             command: ./gradlew androidDependencies
