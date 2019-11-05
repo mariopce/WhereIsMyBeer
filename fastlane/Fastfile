@@ -50,7 +50,7 @@ platform :android do
 
   desc "Assemble Build"
   lane :assemble_build do |options|
-    gradle(task: "assemble", build_type: @build_type)
+    gradle(task: "bundle", build_type: @build_type)
   end
 
   desc "Assemble Test Application"
@@ -65,7 +65,7 @@ platform :android do
   end
 
  lane :beta do
-   gradle(task: 'assemble', build_type: 'Release')
+   gradle(task: 'bundle', build_type: 'Release')
    upload_to_play_store(track: 'beta')
  end
 
