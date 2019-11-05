@@ -1,4 +1,8 @@
 .env
+.bitrise.secrets.yml
+debug.sh
+bitrise.yml
+.android/
 *.iml
 .gradle
 /local.properties
