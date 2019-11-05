@@ -12,5 +12,6 @@
 client-secret.json
 .bundle/
 saramak.jks
+.bundle/
 fastlane/report.xml
 fastlane/play.json
