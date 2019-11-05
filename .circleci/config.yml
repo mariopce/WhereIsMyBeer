@@ -117,39 +117,6 @@ jobs:
         - store_test_results:
             path: app/build/test-results
 
-  test_instrumented:
-      <<: *android_config
-      steps:
-        - checkout
-        - *restore_gems_cache
-        - *restore_cache
-        - *attach_debug_workspace
-        - *swap_tt_key
-        - *decrypt_keystore
-        - *ruby_dependencies
-        - *save_gems_cache
-        - run:
-            name: Create directory to store test results
-            command: mkdir firebase
-        - run:
-            name: Uninstall crcmod
-            command: echo "y" | sudo pip uninstall crcmod
-        - run:
-            name: Install crcmod
-            command: sudo pip install -U crcmod
-        - run:
-            name: Run instrumentation_tests_testlab
-            command: bundle exec fastlane instrumentation_tests_testlab #command: bundle exec fastlane android test
-        - store_artifacts:
-            path: app/build/reports/
-            destination: /reports/
-        - store_test_results:
-            path: app/build/test-results/
-            destination: /test-results/
-        - store_artifacts:
-            path: firebase/
-            destination: /firebase/
-
   deploy_beta:
       <<: *android_config
       steps:
