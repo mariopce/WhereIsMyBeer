@@ -44,7 +44,7 @@ platform :android do
     run_tests_firebase_testlab(
       project_id: "whereismybeartest",
       model: "Nexus6P",
-      version: "27",
+      version: "28",
       delete_firebase_files: false)
   end
 
@@ -71,7 +71,7 @@ platform :android do
 
   desc "Deploy a new version to the Google Play"
   lane :deploy do
-    gradle(task: "clean assembleRelease")
+    gradle(task: "clean bundleRelease")
     upload_to_play_store
   end
 end
