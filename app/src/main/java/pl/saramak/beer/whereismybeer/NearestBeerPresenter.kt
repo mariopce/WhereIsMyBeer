@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ServiceConnection
 import android.location.Location
-import android.support.annotation.NonNull
+import androidx.annotation.NonNull
 import android.widget.Toast
 import com.google.android.gms.location.LocationListener
 import com.tomtom.online.sdk.common.location.LatLng
